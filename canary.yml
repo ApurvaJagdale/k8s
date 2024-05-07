@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-primary-deployment
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: student-app
+      version: primary
+  template:
+    metadata:
+      labels:
+        app: student-app
+        version: primary
+    spec:
+      containers:
+      - name: my-app
+        image: nginx:1.21.3
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-canary-deployment
+spec:
+  replicas: 1  # Adjust the number of replicas as per your canary testing needs
+  selector:
+    matchLabels:
+      app: student-app
+      version: canary
+  template:
+    metadata:
+      labels:
+        app: student-app
+        version: canary
+    spec:
+      containers:
+      - name: my-app
+        image: nginx:1.22.0  # Canary version
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-svc-canary
+spec:
+  selector:
+    app: student-app
+    version: primary   # Initially select the primary version
+  ports:
+  - name: http
+    targetPort: 80
+    port: 80
+  type: ClusterIP
