@@ -1,0 +1,66 @@
+apiVersion: apps/v2
+kind: Deployment
+metadata:
+  name: my-blue-deployment
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: student-app
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: student-app
+        color: blue   
+    spec:
+      containers:
+      - name: my-app
+        image: nginx:1.21.3  
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-green-deployment
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: student-app
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: student-app
+        color: green   # Label to distinguish between blue and green deployments
+    spec:
+      containers:
+      - name: my-app
+        image: nginx:1.22.0  # Image version for the green deployment
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-svc-blue-green
+spec:
+  selector:
+    app: student-app
+  ports:
+  - name: http
+    targetPort: 80
+    port: 80
+  type: ClusterIP
+
